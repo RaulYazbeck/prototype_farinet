@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PropSwipe">
+<link rel="apple-touch-icon" href="icon.png">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="manifest" href="manifest.json">
 <title>PropSwipe</title>
@@ -42,7 +44,7 @@
     flex-direction: column;
     max-width: 420px;
     margin: 0 auto;
-    padding: 0 20px 24px;
+    padding: env(safe-area-inset-top) 20px calc(20px + env(safe-area-inset-bottom));
     position: relative;
   }
 
@@ -51,7 +53,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 0 8px;
+    padding: 12px 0 6px;
   }
 
   .logo {
@@ -105,7 +107,7 @@
     position: relative;
     width: 100%;
     max-width: 360px;
-    height: 420px;
+    height: min(380px, 42dvh);
   }
 
   .card-ghost {

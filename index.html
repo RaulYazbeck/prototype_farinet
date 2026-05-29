@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>PropSwipe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  :root {
+    --gold: #F5C842;
+    --gold-dim: #C49A22;
+    --bg: #0a0a0a;
+    --card-bg: #141414;
+    --card-border: #2a2a2a;
+    --yes: #22C55E;
+    --no: #EF4444;
+    --text: #F0EDE4;
+    --muted: #666;
+    --radius: 20px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .app {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 0 20px 24px;
+    position: relative;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 8px;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--gold);
+  }
+
+  .balance-wrap {
+    text-align: right;
+  }
+
+  .balance-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .balance-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 1px;
+    color: var(--gold);
+    transition: color 0.3s;
+  }
+
+  .balance-amount.flash-red { animation: flashRed 0.5s ease; }
+  .balance-amount.flash-green { animation: flashGreen 0.5s ease; }
+
+  @keyframes flashRed {
+    0%, 100% { color: var(--gold); }
+    50% { color: var(--no); }
+  }
+  @keyframes flashGreen {
+    0%, 100% { color: var(--gold); }
+    50% { color: var(--yes); }
+  }
+
+  /* CARD STACK AREA */
+  .card-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .card-stack {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    height: 420px;
+  }
+
+  .card-ghost {
+    position: absolute;
+    inset: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    transform: scale(0.94) translateY(12px);
+  }
+
+  .card-ghost-2 {
+    position: absolute;
+    inset: 0;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: var(--radius);
+    transform: scale(0.88) translateY(24px);
+  }
+
+  .bet-card {
+    position: absolute;
+    inset: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 24px 24px;
+    cursor: grab;
+    transition: none;
+    will-change: transform;
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .bet-card.animating {
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                opacity 0.35s ease;
+  }
+
+  .bet-card:active { cursor: grabbing; }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .category-badge {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    background: rgba(245, 200, 66, 0.08);
+    border: 1px solid rgba(245, 200, 66, 0.2);
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  .volume-info {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .question-text {
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.35;
+    flex: 1;
+    margin-bottom: 28px;
+    color: var(--text);
+  }
+
+  /* ODDS BAR */
+  .odds-section {
+    margin-bottom: 24px;
+  }
+
+  .odds-bar-wrap {
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    background: #222;
+  }
+
+  .odds-bar-yes {
+    background: var(--yes);
+    border-radius: 3px 0 0 3px;
+    transition: width 0.5s ease;
+  }
+
+  .odds-bar-no {
+    background: var(--no);
+    border-radius: 0 3px 3px 0;
+    flex: 1;
+  }
+
+  .odds-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+
+  .odds-yes { color: var(--yes); font-weight: 600; }
+  .odds-no { color: var(--no); font-weight: 600; }
+
+  /* PAYOUT INFO */
+  .payout-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .payout-box {
+    flex: 1;
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .payout-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .payout-yes-label { color: var(--yes); }
+  .payout-no-label { color: var(--no); }
+
+  .payout-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+  }
+
+  .payout-yes-amount { color: var(--yes); }
+  .payout-no-amount { color: var(--no); }
+
+  /* SWIPE OVERLAYS */
+  .overlay-yes, .overlay-no {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.1s;
+    pointer-events: none;
+  }
+
+  .overlay-yes {
+    background: rgba(34, 197, 94, 0.12);
+    border: 2px solid var(--yes);
+  }
+
+  .overlay-no {
+    background: rgba(239, 68, 68, 0.12);
+    border: 2px solid var(--no);
+  }
+
+  .overlay-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    letter-spacing: 4px;
+    transform: rotate(-20deg);
+  }
+
+  .overlay-yes .overlay-label { color: var(--yes); transform: rotate(-10deg); }
+  .overlay-no .overlay-label { color: var(--no); transform: rotate(10deg); }
+
+  /* RESULT TOAST */
+  .toast {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: #1a1a1a;
+    border: 1px solid var(--card-border);
+    border-radius: 100px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* BOTTOM CONTROLS */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .stake-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .stake-btn {
+    flex: 1;
+    padding: 10px 0;
+    background: transparent;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .stake-btn:hover { border-color: var(--gold-dim); color: var(--gold-dim); }
+  .stake-btn.active {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(245, 200, 66, 0.08);
+  }
+
+  .multiplier-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .mult-btn {
+    flex: 1;
+    padding: 10px 0;
+    background: transparent;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .mult-btn:hover { border-color: var(--gold-dim); color: var(--gold-dim); }
+  .mult-btn.active {
+    border-color: var(--gold);
+    color: #0a0a0a;
+    background: var(--gold);
+  }
+
+  .action-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 4px;
+  }
+
+  .action-no {
+    flex: 1;
+    padding: 16px 0;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1.5px solid var(--no);
+    border-radius: 16px;
+    color: var(--no);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .action-yes {
+    flex: 1;
+    padding: 16px 0;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1.5px solid var(--yes);
+    border-radius: 16px;
+    color: var(--yes);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .action-no:hover { background: rgba(239, 68, 68, 0.18); }
+  .action-yes:hover { background: rgba(34, 197, 94, 0.18); }
+
+  .stake-display {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: -4px;
+  }
+
+  .stake-display span {
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* DONE STATE */
+  .done-card {
+    position: absolute;
+    inset: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .done-icon {
+    font-size: 48px;
+    font-family: 'Bebas Neue', sans-serif;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+
+  .done-text {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .reset-btn {
+    padding: 12px 32px;
+    background: var(--gold);
+    border: none;
+    border-radius: 100px;
+    color: #0a0a0a;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">PropSwipe</div>
+    <div class="balance-wrap">
+      <div class="balance-label">Balance</div>
+      <div class="balance-amount" id="balance">$1,000</div>
+    </div>
+  </div>
+
+  <div class="card-area">
+    <div class="card-stack" id="card-stack">
+      <div class="card-ghost-2"></div>
+      <div class="card-ghost"></div>
+      <div class="bet-card" id="bet-card">
+        <div class="overlay-yes" id="overlay-yes">
+          <div class="overlay-label">YES</div>
+        </div>
+        <div class="overlay-no" id="overlay-no">
+          <div class="overlay-label">NO</div>
+        </div>
+        <div class="card-top">
+          <div class="category-badge" id="category">Crypto</div>
+          <div class="volume-info" id="volume">Vol $4.2M</div>
+        </div>
+        <div class="question-text" id="question">Will Bitcoin reach $200k before end of 2025?</div>
+        <div class="odds-section">
+          <div class="odds-bar-wrap">
+            <div class="odds-bar-yes" id="odds-bar-yes" style="width: 28%"></div>
+            <div class="odds-bar-no"></div>
+          </div>
+          <div class="odds-labels">
+            <div class="odds-yes" id="odds-yes-label">YES 28%</div>
+            <div class="odds-no" id="odds-no-label">NO 72%</div>
+          </div>
+        </div>
+        <div class="payout-row">
+          <div class="payout-box">
+            <div class="payout-label payout-yes-label">If YES wins</div>
+            <div class="payout-amount payout-yes-amount" id="payout-yes">$89</div>
+          </div>
+          <div class="payout-box">
+            <div class="payout-label payout-no-label">If NO wins</div>
+            <div class="payout-amount payout-no-amount" id="payout-no">$35</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="done-card" id="done-card" style="display: none;">
+        <div class="done-icon">ALL IN</div>
+        <div class="done-text">No more bets available</div>
+        <button class="reset-btn" onclick="reset()">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="stake-row">
+      <button class="stake-btn" onclick="setStake(10, this)">$10</button>
+      <button class="stake-btn active" onclick="setStake(25, this)">$25</button>
+      <button class="stake-btn" onclick="setStake(50, this)">$50</button>
+      <button class="stake-btn" onclick="setStake(100, this)">$100</button>
+    </div>
+    <div class="multiplier-row">
+      <button class="mult-btn active" onclick="setMult(1, this)">x1</button>
+      <button class="mult-btn" onclick="setMult(2, this)">x2</button>
+      <button class="mult-btn" onclick="setMult(5, this)">x5</button>
+      <button class="mult-btn" onclick="setMult(10, this)">x10</button>
+    </div>
+    <div class="stake-display">Betting <span id="effective-stake">$25</span> — potential payout shown above</div>
+    <div class="action-row">
+      <button class="action-no" onclick="triggerBet(false)">← NO</button>
+      <button class="action-yes" onclick="triggerBet(true)">YES →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BETS = [
+  { question: "Will Bitcoin reach $200k before end of 2025?", category: "Crypto", volume: "Vol $4.2M", yesOdds: 0.28 },
+  { question: "Will the Fed cut rates at least 3 times in 2025?", category: "Finance", volume: "Vol $6.7M", yesOdds: 0.61 },
+  { question: "Will there be a declared US recession in 2025?", category: "Economy", volume: "Vol $3.1M", yesOdds: 0.38 },
+  { question: "Will Elon Musk leave as Tesla CEO by end of 2026?", category: "Tech", volume: "Vol $1.8M", yesOdds: 0.14 },
+];
+
+let balance = 1000;
+let currentIndex = 0;
+let stake = 25;
+let multiplier = 1;
+let dragX = 0;
+let isDragging = false;
+let startX = 0;
+
+const card = document.getElementById('bet-card');
+const overlayYes = document.getElementById('overlay-yes');
+const overlayNo = document.getElementById('overlay-no');
+const doneCard = document.getElementById('done-card');
+
+function getEffective() { return stake * multiplier; }
+
+function updateCard() {
+  if (currentIndex >= BETS.length) {
+    card.style.display = 'none';
+    document.querySelector('.card-ghost').style.display = 'none';
+    document.querySelector('.card-ghost-2').style.display = 'none';
+    doneCard.style.display = 'flex';
+    return;
+  }
+  const bet = BETS[currentIndex];
+  const eff = getEffective();
+  const yesPayout = Math.round(eff / bet.yesOdds);
+  const noPayout = Math.round(eff / (1 - bet.yesOdds));
+
+  document.getElementById('category').textContent = bet.category;
+  document.getElementById('volume').textContent = bet.volume;
+  document.getElementById('question').textContent = bet.question;
+  document.getElementById('odds-bar-yes').style.width = (bet.yesOdds * 100) + '%';
+  document.getElementById('odds-yes-label').textContent = 'YES ' + Math.round(bet.yesOdds * 100) + '%';
+  document.getElementById('odds-no-label').textContent = 'NO ' + Math.round((1 - bet.yesOdds) * 100) + '%';
+  document.getElementById('payout-yes').textContent = '$' + yesPayout;
+  document.getElementById('payout-no').textContent = '$' + noPayout;
+  document.getElementById('effective-stake').textContent = '$' + eff;
+}
+
+function updateBalance() {
+  document.getElementById('balance').textContent = '$' + balance.toLocaleString();
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.color = color;
+  t.style.borderColor = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+function triggerBet(isYes, animated = true) {
+  if (currentIndex >= BETS.length) return;
+  const eff = getEffective();
+  if (eff > balance) { showToast('Insufficient balance', '#EF4444'); return; }
+
+  const bet = BETS[currentIndex];
+  const payout = isYes ? Math.round(eff / bet.yesOdds) : Math.round(eff / (1 - bet.yesOdds));
+  balance -= eff;
+  updateBalance();
+
+  const balEl = document.getElementById('balance');
+  balEl.classList.remove('flash-red', 'flash-green');
+  void balEl.offsetWidth;
+  balEl.classList.add('flash-red');
+
+  showToast((isYes ? '✅ YES' : '❌ NO') + ' — To win $' + payout, isYes ? '#22C55E' : '#EF4444');
+
+  card.classList.add('animating');
+  card.style.transform = `translateX(${isYes ? 500 : -500}px) rotate(${isYes ? 20 : -20}deg)`;
+  card.style.opacity = '0';
+
+  setTimeout(() => {
+    card.classList.remove('animating');
+    card.style.transform = '';
+    card.style.opacity = '';
+    overlayYes.style.opacity = '0';
+    overlayNo.style.opacity = '0';
+    currentIndex++;
+    updateCard();
+    dragX = 0;
+  }, 360);
+}
+
+function setStake(s, el) {
+  stake = s;
+  document.querySelectorAll('.stake-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  updateCard();
+}
+
+function setMult(m, el) {
+  multiplier = m;
+  document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  updateCard();
+}
+
+function reset() {
+  balance = 1000;
+  currentIndex = 0;
+  stake = 25;
+  multiplier = 1;
+  card.style.display = '';
+  card.style.transform = '';
+  card.style.opacity = '';
+  document.querySelector('.card-ghost').style.display = '';
+  document.querySelector('.card-ghost-2').style.display = '';
+  doneCard.style.display = 'none';
+  document.querySelectorAll('.stake-btn').forEach((b, i) => b.classList.toggle('active', i === 1));
+  document.querySelectorAll('.mult-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+  updateBalance();
+  updateCard();
+}
+
+// DRAG
+function onPointerDown(e) {
+  if (currentIndex >= BETS.length) return;
+  isDragging = true;
+  startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+  dragX = 0;
+}
+
+function onPointerMove(e) {
+  if (!isDragging) return;
+  const x = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+  dragX = x - startX;
+  const rot = dragX * 0.08;
+  card.style.transform = `translateX(${dragX}px) rotate(${rot}deg)`;
+  const progress = Math.min(Math.abs(dragX) / 120, 1);
+  if (dragX > 0) {
+    overlayYes.style.opacity = progress;
+    overlayNo.style.opacity = 0;
+  } else {
+    overlayNo.style.opacity = progress;
+    overlayYes.style.opacity = 0;
+  }
+}
+
+function onPointerUp() {
+  if (!isDragging) return;
+  isDragging = false;
+  if (Math.abs(dragX) > 100) {
+    triggerBet(dragX > 0);
+  } else {
+    card.classList.add('animating');
+    card.style.transform = '';
+    overlayYes.style.opacity = 0;
+    overlayNo.style.opacity = 0;
+    setTimeout(() => card.classList.remove('animating'), 350);
+  }
+  dragX = 0;
+}
+
+card.addEventListener('mousedown', onPointerDown);
+card.addEventListener('touchstart', onPointerDown, { passive: true });
+window.addEventListener('mousemove', onPointerMove);
+window.addEventListener('touchmove', onPointerMove, { passive: true });
+window.addEventListener('mouseup', onPointerUp);
+window.addEventListener('touchend', onPointerUp);
+
+updateCard();
+</script>
+</body>
+</html>

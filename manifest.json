@@ -2,19 +2,20 @@
   "name": "PropSwipe",
   "short_name": "PropSwipe",
   "description": "Swipe to bet on prediction markets",
-  "start_url": "/",
+  "start_url": "/prototype_farinet/",
+  "scope": "/prototype_farinet/",
   "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192x192/0a0a0a/F5C842?text=PS",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://via.placeholder.com/512x512/0a0a0a/F5C842?text=PS",
+      "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
